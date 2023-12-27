@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button } from '@mui/material';
 import { Link } from 'react-router-dom'
 import './style.scss';
+import axios from "axios";
 
 const Juridico = () => {
 
@@ -229,29 +230,33 @@ const Juridico = () => {
     ];
 
     const enviarResultados = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error('No se ha iniciado sesión o falta el token');
+            return;
+        }
+    
         try {
-            const response = await fetch('http://localhost:8081/guardarPsico', {
-                method: 'POST',
+            const response = await axios.post('http://localhost:8081/guardarJ', {
+                resultado: grupoActual
+
+            }, {
                 headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    usuario: 'usuario', // Asegúrate de tener el ID del usuario
-                    resultado: contadorSi // O cualquier lógica para determinar el nivel de violencia
-                }),
+                    'Authorization': `Bearer ${token}`
+                }
             });
     
-            const data = await response.json();
-            console.log(data.message);
+            console.log("Respuesta del servidor:", response.data.message);
         } catch (error) {
             console.error('Error al enviar resultados:', error);
         }
     };
-
+     
     // Definimos el estado.
     const [respuestaTemporal, setRespuestaTemporal] = useState(null);
     const [preguntaActual, setPreguntaActual] = useState(0);
     const [contador, setContador] = useState(0);
+    const [contadorSi, setContadorSi] = useState(0);
     const [respuestas, setRespuestas] = useState([]);
     const [grupoActual, setGrupoActual] = useState("peligro");
 
@@ -268,6 +273,9 @@ const Juridico = () => {
         if (respuestaTemporal !== null) {
             setRespuestas([...respuestas, respuestaTemporal]);
 
+            if (respuestaTemporal === "Sí") {
+                setContadorSi(contadorSi + 1);
+            }
             if (preguntaActual === 0 && respuestaTemporal === "No") {
                 // Si es la primera pregunta y la respuesta es "No", cambia de grupo directamente
                 determinarProximoGrupo();
@@ -307,7 +315,6 @@ const Juridico = () => {
     };
 
     // Esta función determina el próximo grupo de preguntas
-
     const determinarProximoGrupo = () => {
         const nuevoGrupo = grupoActual === "peligro" ? "riesgo" : grupoActual === "riesgo" ? "cuidado" : null;
         if (nuevoGrupo) {
@@ -318,6 +325,7 @@ const Juridico = () => {
             // Si no hay más preguntas en el grupo, finaliza el cuestionario
             setFinalizado(true);
             establecerMensajeFinal();
+            finalizarTest();
         }
     };
 
@@ -329,6 +337,22 @@ const Juridico = () => {
         } else {
             setMensajeFinal("¡NO ESTAS SOLA! Estas sufriendo de maltrato emocional ten cuidado porque esto puede ir a peor. Acércate a nuestras instalaciones para darte brindarte información sobre tus derechos, cómo obtener protección y cómo recuperarte del abuso, el Instituto tachirense de la Mujer (INTAMUJER) te ofrecerá ayuda.");
         }
+    };
+
+    //categoria de maltrato por la ultima respesta
+    const determinarTipoMaltrato = (respuestas) => {
+        let ultimoTipoMaltrato = "Ninguno";
+        preguntas.forEach((pregunta, index) => {
+            if (respuestas[index] === "Sí") {
+                ultimoTipoMaltrato = pregunta.tipo;
+            }
+        });
+        return ultimoTipoMaltrato;
+    };
+
+    const finalizarTest = () => {
+        let tipoMaltrato = determinarTipoMaltrato(respuestas);
+        enviarResultados(tipoMaltrato);
     };
 
     // Renderizamos la pregunta actual.
@@ -395,15 +419,12 @@ const Juridico = () => {
         );
     };
 
-
-
-
-
     return (
         <div>
             {renderPregunta()}
         </div>
     );
+
 };
 
 export default Juridico;
