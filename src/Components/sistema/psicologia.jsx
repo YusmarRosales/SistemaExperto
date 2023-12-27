@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button } from '@mui/material';
 import { Link } from 'react-router-dom'
 import './style.scss';
+import axios from "axios";
 
 const Psicologia = () => {
 
@@ -166,29 +167,29 @@ const Psicologia = () => {
         }
     ];
 
-    const enviarResultados = async (Usuario) => {
-        console.log("Usuario enviado:", Usuario); // Asegúrate de que Usuario no es null o undefined
-        
+    const enviarResultados = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error('No se ha iniciado sesión o falta el token');
+            return;
+        }
+    
         try {
-            const response = await fetch('http://localhost:8081/guardar', {
-                method: 'POST',
+            const response = await axios.post('http://localhost:8081/guardar', {
+                resultado: grupoActual
+
+            }, {
                 headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    Usuario: Usuario, 
-                    resultado: contadorSi
-                }),
+                    'Authorization': `Bearer ${token}`
+                }
             });
     
-            const data = await response.json();
-            console.log("Respuesta del servidor:", data.message);
+            console.log("Respuesta del servidor:", response.data.message);
         } catch (error) {
             console.error('Error al enviar resultados:', error);
         }
     };
-    
-    
+     
     // Definimos el estado.
     const [respuestaTemporal, setRespuestaTemporal] = useState(null);
     const [preguntaActual, setPreguntaActual] = useState(0);
@@ -262,7 +263,7 @@ const Psicologia = () => {
             // Si no hay más preguntas en el grupo, finaliza el cuestionario
             setFinalizado(true);
             establecerMensajeFinal();
-            enviarResultados();
+            finalizarTest();
         }
     };
 
@@ -289,9 +290,7 @@ const Psicologia = () => {
 
     const finalizarTest = () => {
         let tipoMaltrato = determinarTipoMaltrato(respuestas);
-        setTipoMaltrato(tipoMaltrato); // Asumiendo que tienes un estado llamado tipoMaltrato
-        guardarResultadoTest(tipoMaltrato);
-        // Continuar con la lógica de finalización y mostrar mensajes
+        enviarResultados(tipoMaltrato);
     };
 
     // Renderizamos la pregunta actual.

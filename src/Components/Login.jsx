@@ -20,11 +20,18 @@ const Login = () => {
             alert('Por favor, complete todos los campos del formulario');
             return;
         }
+        
         axios.post('http://localhost:8081/ingreso', values)
             .then(res => {
                 console.log(res);
                 if (res.data.Message === "Inicio de sesión exitoso") {
                     setIsAuthenticated(true);
+
+                    // Guardar el nombre de usuario en el almacenamiento local
+                    localStorage.setItem('usuario', values.Usuario);
+
+                    // Opcional: Guardar el token JWT si lo vas a usar más adelante
+                    localStorage.setItem('token', res.data.token);
                 } else {
                     alert('Credenciales inválidas');
                 }
