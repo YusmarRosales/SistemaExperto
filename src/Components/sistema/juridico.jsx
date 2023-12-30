@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button } from '@mui/material';
 import { Link } from 'react-router-dom'
 import './style.scss';
+import axios from "axios";
 
 const Juridico = () => {
 
@@ -279,14 +280,13 @@ const Juridico = () => {
                 // Si es la primera pregunta y la respuesta es "No", cambia de grupo directamente
                 determinarProximoGrupo();
             } else {
-                // Si no es la primera pregunta o la respuesta no es "No"
+                // Si la primera pregunta es "Sí" pero tiene 2 respuestas de "no"
                 if (respuestaTemporal === "No") {
                     manejarRespuestaNo();
                 } else {
                     avanzarAPreguntaSiguiente();
                 }
             }
-
             setRespuestaTemporal(null);
         } else {
             alert('Por favor seleccione alguna de las opciones');
@@ -294,15 +294,15 @@ const Juridico = () => {
     };
 
     const avanzarAPreguntaSiguiente = () => {
-        const preguntasGrupoActual = preguntas.filter(p => p.tipo === grupoActual);
-        if (preguntaActual < preguntasGrupoActual.length - 1) {
-            // Si aún quedan preguntas en el grupo actual, avanza a la siguiente
+        const preguntasDelGrupo = preguntas.filter(p => p.tipo === grupoActual);
+        if (preguntaActual < preguntasDelGrupo.length - 1) {
             setPreguntaActual(preguntaActual + 1);
         } else {
-            // Si es la última pregunta del grupo, determina el próximo grupo o finaliza el test
-            determinarProximoGrupo();
+            // Finaliza el cuestionario cuando se responde la última pregunta del grupo actual
+            setFinalizado(true);
+            establecerMensajeFinal();
+            finalizarTest();
         }
-    
     };
 
     const manejarRespuestaNo = () => {
@@ -318,15 +318,14 @@ const Juridico = () => {
 
     // Esta función determina el próximo grupo de preguntas
     const determinarProximoGrupo = () => {
-        setContador(0); // Resetea el contador de "No"
-
+        setContador(0);
+    
         const nuevoGrupo = grupoActual === "peligro" ? "riesgo" : grupoActual === "riesgo" ? "cuidado" : null;
         if (nuevoGrupo) {
-            // Si hay un grupo siguiente, cambia a ese grupo
             setGrupoActual(nuevoGrupo);
             setPreguntaActual(0);
         } else {
-            // Si no hay más grupos, finaliza el test y muestra el mensaje final
+            // Si no hay más grupos, finaliza el cuestionario
             setFinalizado(true);
             establecerMensajeFinal();
             finalizarTest();
@@ -344,7 +343,8 @@ const Juridico = () => {
     };
 
     //categoria de maltrato por la ultima respesta
-    const determinarTipoMaltrato = (respuestas) => {
+     //categoria de maltrato por la ultima respesta
+     const determinarTipoMaltrato = (respuestas) => {
         let ultimoTipoMaltrato = "Ninguno";
         preguntas.forEach((pregunta, index) => {
             if (respuestas[index] === "Sí") {
@@ -358,6 +358,7 @@ const Juridico = () => {
         let tipoMaltrato = determinarTipoMaltrato(respuestas);
         enviarResultados(tipoMaltrato);
     };
+
 
     // Renderizamos la pregunta actual.
     const renderPregunta = () => {
