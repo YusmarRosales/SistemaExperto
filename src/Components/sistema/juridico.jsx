@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Button } from '@mui/material';
 import { Link } from 'react-router-dom'
 import './style.scss';
-import axios from "axios";
 
 const Juridico = () => {
 
@@ -251,7 +250,7 @@ const Juridico = () => {
             console.error('Error al enviar resultados:', error);
         }
     };
-     
+
     // Definimos el estado.
     const [respuestaTemporal, setRespuestaTemporal] = useState(null);
     const [preguntaActual, setPreguntaActual] = useState(0);
@@ -295,34 +294,39 @@ const Juridico = () => {
     };
 
     const avanzarAPreguntaSiguiente = () => {
-        if (preguntaActual < preguntas.filter(p => p.tipo === grupoActual).length - 1) {
+        const preguntasGrupoActual = preguntas.filter(p => p.tipo === grupoActual);
+        if (preguntaActual < preguntasGrupoActual.length - 1) {
+            // Si aún quedan preguntas en el grupo actual, avanza a la siguiente
             setPreguntaActual(preguntaActual + 1);
         } else {
+            // Si es la última pregunta del grupo, determina el próximo grupo o finaliza el test
             determinarProximoGrupo();
         }
+    
     };
 
     const manejarRespuestaNo = () => {
         const nuevoContador = contador + 1;
         setContador(nuevoContador);
 
-        if (nuevoContador >= 2) {
+        if (nuevoContador >= 2 || preguntaActual === preguntas.filter(p => p.tipo === grupoActual).length - 1) {
             determinarProximoGrupo();
         } else {
-            avanzarAPreguntaSiguiente();
-
+            setPreguntaActual(preguntaActual + 1); // Avanza a la siguiente pregunta dentro del mismo grupo
         }
     };
 
     // Esta función determina el próximo grupo de preguntas
     const determinarProximoGrupo = () => {
+        setContador(0); // Resetea el contador de "No"
+
         const nuevoGrupo = grupoActual === "peligro" ? "riesgo" : grupoActual === "riesgo" ? "cuidado" : null;
         if (nuevoGrupo) {
+            // Si hay un grupo siguiente, cambia a ese grupo
             setGrupoActual(nuevoGrupo);
-            setPreguntaActual(0); // Comienza desde la primera pregunta del nuevo grupo
-            setContador(0);
+            setPreguntaActual(0);
         } else {
-            // Si no hay más preguntas en el grupo, finaliza el cuestionario
+            // Si no hay más grupos, finaliza el test y muestra el mensaje final
             setFinalizado(true);
             establecerMensajeFinal();
             finalizarTest();
@@ -426,6 +430,7 @@ const Juridico = () => {
     );
 
 };
+
 
 export default Juridico;
 

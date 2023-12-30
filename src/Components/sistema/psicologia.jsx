@@ -218,14 +218,13 @@ const Psicologia = () => {
                 // Si es la primera pregunta y la respuesta es "No", cambia de grupo directamente
                 determinarProximoGrupo();
             } else {
-                // Si no es la primera pregunta o la respuesta no es "No"
+                // Si la primera pregunta es "Sí" pero tiene 2 respuestas de "no"
                 if (respuestaTemporal === "No") {
                     manejarRespuestaNo();
                 } else {
                     avanzarAPreguntaSiguiente();
                 }
             }
-
             setRespuestaTemporal(null);
         } else {
             alert('Por favor seleccione alguna de las opciones');
@@ -233,10 +232,14 @@ const Psicologia = () => {
     };
 
     const avanzarAPreguntaSiguiente = () => {
-        if (preguntaActual < preguntas.filter(p => p.tipo === grupoActual).length - 1) {
+        const preguntasDelGrupo = preguntas.filter(p => p.tipo === grupoActual);
+        if (preguntaActual < preguntasDelGrupo.length - 1) {
             setPreguntaActual(preguntaActual + 1);
         } else {
-            determinarProximoGrupo();
+            // Finaliza el cuestionario cuando se responde la última pregunta del grupo actual
+            setFinalizado(true);
+            establecerMensajeFinal();
+            finalizarTest();
         }
     };
 
@@ -244,23 +247,23 @@ const Psicologia = () => {
         const nuevoContador = contador + 1;
         setContador(nuevoContador);
 
-        if (nuevoContador >= 2) {
+        if (nuevoContador >= 2 || preguntaActual === preguntas.filter(p => p.tipo === grupoActual).length - 1) {
             determinarProximoGrupo();
         } else {
-            avanzarAPreguntaSiguiente();
-
+            setPreguntaActual(preguntaActual + 1); // Avanza a la siguiente pregunta dentro del mismo grupo
         }
     };
 
     // Esta función determina el próximo grupo de preguntas
     const determinarProximoGrupo = () => {
+        setContador(0);
+    
         const nuevoGrupo = grupoActual === "peligro" ? "riesgo" : grupoActual === "riesgo" ? "cuidado" : null;
         if (nuevoGrupo) {
             setGrupoActual(nuevoGrupo);
-            setPreguntaActual(0); // Comienza desde la primera pregunta del nuevo grupo
-            setContador(0);
+            setPreguntaActual(0);
         } else {
-            // Si no hay más preguntas en el grupo, finaliza el cuestionario
+            // Si no hay más grupos, finaliza el cuestionario
             setFinalizado(true);
             establecerMensajeFinal();
             finalizarTest();
@@ -268,9 +271,9 @@ const Psicologia = () => {
     };
 
     const establecerMensajeFinal = () => {
-        if (contadorSi > 20) {
+        if (grupoActual === "peligro") {
             setMensajeFinal("¡NO ESTAS SOLA! es importante que reconozcas que podrías estar experimentando una forma de violencia psicológica. A menudo, este tipo de violencia comienza de manera sutil y puede ser difícil de identificar.. Acércate a nuestras instalaciones para darte brindarte información sobre tus derechos, cómo obtener protección y cómo recuperarte del abuso, el Instituto tachirense de la Mujer (INTAMUJER) te ofrecerá ayuda.");
-        } else if (contadorSi > 10 && contadorSi <= 20) {
+        } else if (grupoActual === "riesgo") {
             setMensajeFinal("¡NO ESTAS SOLA! Estas sufriendo situaciones más intensas de violencia psicológica ten cuidado, No tienes que manejar esto por tu cuenta. Acércate a nuestras instalaciones para darte brindarte información sobre tus derechos, cómo obtener protección y cómo recuperarte del abuso, el Instituto tachirense de la Mujer (INTAMUJER) te ofrecerá ayuda.");
         } else {
             setMensajeFinal("¡NO ESTAS SOLA! Estas sufriendo situaciones extremadamente graves de violencia psicológica, que pueden poner en riesgo tu integridad física y emocional. Acércate a nuestras instalaciones para darte brindarte información sobre tus derechos, cómo obtener protección y cómo recuperarte del abuso, el Instituto tachirense de la Mujer (INTAMUJER) te ofrecerá ayuda.");
