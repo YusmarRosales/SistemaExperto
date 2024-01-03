@@ -46,8 +46,9 @@ const Login = () => {
         const payload = atob(base64Payload);
         const userPayload = JSON.parse(payload);
 
-        console.log("Rol del usuario:", userPayload.rol);
-        setUser({ token: userData.token, rol: userPayload.rol });
+        const userRole = userPayload.rol || 'usuario';
+        console.log("userRole:", userRole);
+        setUser({ token: userData.token, rol: userRole });
     }
 
     const handleChange = (event) => {
@@ -61,16 +62,13 @@ const Login = () => {
     useEffect(() => {
         console.log("user.token", user.token);
         if (user && user.token) {
-            const base64Payload = user.token.split('.')[1];
-            const payload = atob(base64Payload);
-            const userPayload = JSON.parse(payload);
-
-            const userRole = userPayload && userPayload.rol;
-            console.log("userRole", userRole);
-            if (userRole) {
-                const redirectPath = userRole === 'usuario' ? '/user/home' : '/user/expert';
-                navigate(redirectPath);
-            }
+            let redirectPath = '/user/home'; // Ruta por defecto para usuarios regulares
+        if (user.rol === 'abogado') {
+            redirectPath = '/user/expert/juridico';
+        } else if (user.rol === 'psicolo') {
+            redirectPath = '/user/expert/psicologico';
+        }
+            navigate(redirectPath);
         }
     }, [user, navigate]);
 
