@@ -16,6 +16,7 @@ import Psicologia from './Components/sistema/psicologia';
 import Juridico from './Components/sistema/juridico';
 
 import Derecho from './Components/expert/juridic';
+import PsicolAyu from './Components/expert/psicolog';
 
 import { AuthProvider } from './Components/authen/authContext';
 import ProtectedRoute from './Components/routes/ProtectedRoute';
@@ -46,10 +47,16 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 						</ProtectedRoute>
 					} />
 
-					{/* Rutas para usuarios */}
-					<Route path='/user/expert' element={
-						<ProtectedRoute rol="experto">
+					{/* Rutas para expertos */}
+					<Route path='/user/expert/juridico' element={
+						<ProtectedRoute rol="abogado">
 							<Derecho />
+						</ProtectedRoute>
+					} />
+
+					<Route path='/user/expert/psicologico' element={
+						<ProtectedRoute rol="psicolo">
+							<PsicolAyu />
 						</ProtectedRoute>
 					} />
 
