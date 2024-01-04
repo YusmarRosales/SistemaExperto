@@ -5,8 +5,12 @@ import ButtonBase from '@mui/material/ButtonBase';
 import Typography from '@mui/material/Typography';
 import { Link } from 'react-router-dom';
 
-const usuario = localStorage.getItem('usuario');
-
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import IconButton from '@mui/material/IconButton';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from './authen/authContext';
 
 const images = [
   {
@@ -88,7 +92,32 @@ const ImageMarked = styled('span')(({ theme }) => ({
 }));
 
 export default function ButtonBaseDemo() {
+
+  const { setUser } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    console.log("cierre de sesión");
+    localStorage.removeItem('token');
+    setUser({});
+    navigate('/user');
+  };
+
   return (
+    <>
+    <AppBar position="static" sx={{ backgroundColor: '#9a8cf9' }}>
+      <Toolbar>
+        <IconButton
+          edge="end"
+          color="inherit"
+          aria-label="logout"
+          onClick={handleLogout}
+        >
+          <LogoutIcon />
+        </IconButton>
+      </Toolbar>
+    </AppBar>
+
     <Box sx={{ display: 'flex', flexWrap: 'wrap', minWidth: 500, width: '80%', padding: '10%' }}>
       {images.map((image) => (
         <ImageButton
@@ -121,5 +150,6 @@ export default function ButtonBaseDemo() {
         </ImageButton>
       ))}
     </Box>
+    </>
   );
 }
