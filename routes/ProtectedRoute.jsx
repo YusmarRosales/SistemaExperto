@@ -8,7 +8,7 @@ const ProtectedRoute = ({ children, rol }) => {
     if (!user) {
       return <Navigate to="/user" />;
     } else if (user.rol !== rol) {
-      return <Navigate to={user.rol === 'usuario' ? '/user/home' : '/user/expert'} />;
+      return <Navigate to={user.rol === 'usuario' ? '/user/home' : user.rol === 'experto' ? '/user/psicologico':'/user/juridico'} />;
     }
   
     return children;
