@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from '@mui/material';
 import { Link } from 'react-router-dom'
 import './style.scss';
@@ -252,6 +252,29 @@ const Juridico = () => {
         }
     };
 
+    const verificarTestCompletado = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error('No se ha iniciado sesión o falta el token');
+            return;
+        }
+
+        try {
+            const response = await axios.get('http://localhost:8081/verificarTestJuri', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            // Aquí debes actualizar el estado basado en la respuesta
+            if (response.data.testCompletado) {
+                setTestYaCompletado(true);
+            }
+        } catch (error) {
+            console.error('Error al verificar el test:', error);
+        }
+    };
+
     // Definimos el estado.
     const [respuestaTemporal, setRespuestaTemporal] = useState(null);
     const [preguntaActual, setPreguntaActual] = useState(0);
@@ -262,8 +285,39 @@ const Juridico = () => {
 
     const [finalizado, setFinalizado] = useState(false); // Estado para saber si el cuestionario ha terminado
     const [mensajeFinal, setMensajeFinal] = useState(""); // Estado para el mensaje final
+    const [testYaCompletado, setTestYaCompletado] = useState(false);
     const [respuestaSeleccionada, setRespuestaSeleccionada] = useState(null);
 
+    useEffect(() => {
+        verificarTestCompletado();
+    }, []);
+
+    const renderFinal = () => {
+        if (testYaCompletado) {
+            return (
+                <div className="modalContainer">
+                <div className="modal">
+                    <main className="modal_content">
+                        <p>Test Finalizado</p>
+                    </main>
+                    <footer className="modal_footer">
+                        <Link to={'/user/home'}>
+                            <Button color='primary'
+                                variant='contained'
+                                size='large'>
+                                Cerrar
+                            </Button>
+                        </Link>
+                    </footer>
+                </div>
+            </div>
+            );
+        } else if (finalizado) {
+            return renderModalRespuestas();
+        }else {
+            return renderPregunta();
+        }
+    };
 
     const handleCheckboxChange = (respuesta) => {
         setRespuestaTemporal(respuesta); // Almacena la respuesta temporalmente
@@ -429,7 +483,7 @@ const Juridico = () => {
 
     return (
         <div>
-            {renderPregunta()}
+            {renderFinal()}
         </div>
     );
 
