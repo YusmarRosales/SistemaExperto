@@ -18,7 +18,7 @@ function App() {
 
   if (btnstate) {
     setTimeout(() => {
-      window.location.replace('/registry')
+      window.location.replace('/user/registry')
     }, 1000)
   }
 

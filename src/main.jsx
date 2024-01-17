@@ -10,22 +10,46 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import App from './App';
 import Modal from './Components/Modal';
 import Login from './Components/Login';
-import Layout from './Components/loyout';
-import Psicologia from './Components/sistema/psicologia';
-import Juridico from './Components/sistema/juridico';
 
+import Layout from './Components/loyout';
+import Derecho from './Components/expert/juridic';
+import PsicolAyu from './Components/expert/psicolog';
+
+import { AuthProvider } from './Components/authen/authContext';
+import ProtectedRoute from './Components/routes/ProtectedRoute';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
 	<React.StrictMode>
-		<BrowserRouter>
-			<Routes>
-				<Route path='/' element={<App />} />
-				<Route path='/registry' element={<Modal />} />
-				<Route path='/user' element={<Login />} />
-				<Route path='/user/home' element={<Layout />} />
-				<Route path='/user/home/psicologia' element={<Psicologia />} />
-				<Route path='/user/home/juridico' element={<Juridico />} />
-			</Routes>
-		</BrowserRouter>
+		<AuthProvider>
+			<BrowserRouter>
+				<Routes>
+					<Route path='/' element={<App />} />
+					<Route path='/user/registry' element={<Modal />} />
+					<Route path='/user' element={<Login />} />
+
+					{/* Rutas para usuarios */}
+					<Route path='/user/home' element={
+						<ProtectedRoute rol="usuario">
+							<Layout />
+						</ProtectedRoute>
+					} />
+
+					{/* Rutas para expertos */}
+					<Route path='/user/juridico' element={
+						<ProtectedRoute rol="abogado">
+							<Derecho />
+						</ProtectedRoute>
+					} />
+
+					<Route path='/user/psicologico' element={
+						<ProtectedRoute rol="psicolo">
+							<PsicolAyu />
+						</ProtectedRoute>
+					} />
+
+
+				</Routes>
+			</BrowserRouter>
+		</AuthProvider>
 	</React.StrictMode>,
 )

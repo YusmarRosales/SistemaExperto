@@ -1,3 +1,35 @@
+.preg {
+  text-align: center;
+  padding: 10px 10px 10px 10px;
+  margin: 20% 20% 2% 21%;
+}
+
+.resp {
+  font-size: 25px;
+}
+
+.boton {
+  transform: scale(1.5);
+  margin: 5px;
+
+}
+
+.pregunt{
+  font-size: 250%;
+  //background-color: #fff;
+}
+.fondo {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-image: url('../public/fondo.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 /*--------------
 Caja de inicio
 ---------------*/
@@ -7,9 +39,7 @@ Caja de inicio
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: rgba($color: #CEC7FF
-      /*#3e88c1*/
-      , $alpha: 0.50);
+  background-color: rgba($color: #CEC7FF, $alpha: 0.50);
 
   display: flex;
   justify-content: center;
@@ -57,7 +87,7 @@ Caja de inicio
         top: 0;
         bottom: 0;
         left: 2%;
-        
+
         &:hover {
           background-color: rgb(4, 122, 182);
         }

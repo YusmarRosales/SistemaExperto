@@ -10,7 +10,8 @@ const Modal = () => {
         Nombre: '',
         Apellido: '',
         Usuario: '',
-        Contrasena: ''
+        Contrasena: '',
+        Telefono: ''
     })
 
     const [isFormSubmitted, setIsFormSubmitted] = useState(false);
@@ -18,7 +19,7 @@ const Modal = () => {
     const handleSubmit = (event) => {
         event.preventDefault();
 
-        if (values.Nombre === '' || values.Apellido === '' || values.Usuario === '' || values.Contrasena === '') {
+        if (values.Nombre === '' || values.Apellido === '' || values.Usuario === '' || values.Contrasena === '' || values.Telefono === '') {
             alert('Por favor, complete todos los campos del formulario');
             return;
         }
@@ -71,6 +72,18 @@ const Modal = () => {
                                 placeholder='Apellido'
                                 value={values.Apellido}
                                 onChange={e => setValues({ ...values, Apellido: e.target.value })}
+                            />
+                            <TextField
+                                fullWidth
+                                autoFocus
+                                type='text'
+                                color='primary'
+                                margin='normal'
+                                variant='outlined'
+                                label='Numero de Telefono o Correo'
+                                placeholder='Numero de Telefono o Correo'
+                                value={values.Telefono}
+                                onChange={e => setValues({ ...values, Telefono: e.target.value })}
                             />
                             <TextField
                                 fullWidth

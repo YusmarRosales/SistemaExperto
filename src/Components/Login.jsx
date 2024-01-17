@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import './style.scss'
 import { TextField, Button } from '@mui/material'
-import { Link, Navigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from "./authen/authContext";
 import axios from 'axios';
 
 const Login = () => {
@@ -11,7 +12,8 @@ const Login = () => {
         Contrasena: ''
     })
 
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const { user, setUser } = useAuth();
+    const navigate = useNavigate();
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -20,12 +22,12 @@ const Login = () => {
             alert('Por favor, complete todos los campos del formulario');
             return;
         }
-        
+
         axios.post('http://localhost:8081/ingreso', values)
             .then(res => {
-                console.log(res);
+                console.log("Respuesta del servidor:", res);
                 if (res.data.Message === "Inicio de sesión exitoso") {
-                    setIsAuthenticated(true);
+                    handleLoginSuccess(res.data);
 
                     // Guardar el nombre de usuario en el almacenamiento local
                     localStorage.setItem('usuario', values.Usuario);
@@ -39,6 +41,16 @@ const Login = () => {
             .catch(err => console.log(err));
     };
 
+    const handleLoginSuccess = (userData) => {
+        const base64Payload = userData.token.split('.')[1];
+        const payload = atob(base64Payload);
+        const userPayload = JSON.parse(payload);
+
+        const userRole = userPayload.rol || 'usuario';
+        console.log("userRole:", userRole);
+        setUser({ token: userData.token, rol: userRole });
+    }
+
     const handleChange = (event) => {
         const { name, value } = event.target;
         setValues((prevValues) => ({
@@ -47,9 +59,20 @@ const Login = () => {
         }));
     };
 
-    if (isAuthenticated) {
-        return <Navigate to='/user/home' />
-    }
+    useEffect(() => {
+        if (user && user.token) {
+            let redirectPath = '/user/home'; 
+        if (user.rol === 'abogado') {
+            redirectPath = '/user/juridico';
+        } else if (user.rol === 'psicolo') {
+            redirectPath = '/user/psicologico';
+        }
+            navigate(redirectPath);
+        }
+    }, [user, navigate]);
+
+
+
     return (
         <>
             <div className="modalContainer" >
@@ -91,15 +114,13 @@ const Login = () => {
                     </main>
 
                     <footer className="modal_footer">
-                        <Link to={isAuthenticated}>
-                            <Button color='primary'
-                                className='boton-esp'
-                                variant='contained'
-                                size='large'
-                                onClick={handleSubmit}>
-                                ACEPTAR
-                            </Button>
-                        </Link>
+                        <Button color='primary'
+                            className='boton-esp'
+                            variant='contained'
+                            size='large'
+                            onClick={handleSubmit}>
+                            ACEPTAR
+                        </Button>
                     </footer>
                 </div>
             </div>
