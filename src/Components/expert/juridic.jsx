@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
@@ -13,11 +14,14 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { Button } from '@mui/material';
 
 export default function juridic() {
 
     const { setUser } = useAuth();
     const navigate = useNavigate();
+    const [userData, setUserData] = useState([]);
 
     const handleLogout = () => {
         console.log("cierre de sesión");
@@ -25,8 +29,6 @@ export default function juridic() {
         setUser({});
         navigate('/user');
     };
-
-    const [userData, setUserData] = useState([]);
 
     useEffect(() => {
         fetch('http://localhost:8081/resultadosJuridic')
@@ -39,6 +41,22 @@ export default function juridic() {
             .then(data => setUserData(data))
             .catch(error => console.error("Error al obtener datos:", error));
     }, []);
+
+    const deleteUser = (id) => {
+        fetch(`http://localhost:8081/deleteJuridico/${id}`, {
+            method: 'DELETE', 
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error al eliminar el usuario');
+            }
+            return response.json(); 
+        })
+        .then(data => {
+            console.log(data); 
+        })
+        .catch(error => console.error("Error al eliminar el usuario:", error));
+    };
 
     return (
         <>
@@ -63,6 +81,7 @@ export default function juridic() {
                             <TableCell>Usuario</TableCell>
                             <TableCell>Telefono o Correo</TableCell>
                             <TableCell>Resultado del Test</TableCell>
+                            <TableCell>Eliminar</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -76,6 +95,11 @@ export default function juridic() {
                                 <TableCell>{user.Usuario} </TableCell>
                                 <TableCell>{user.Telefono} </TableCell>
                                 <TableCell>{user.resultado} </TableCell>
+                                <TableCell>
+                                    <Button onClick={() => deleteUser(user.ID)} style={{ cursor: 'pointer' }}>
+                                        <DeleteIcon />
+                                    </Button>
+                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

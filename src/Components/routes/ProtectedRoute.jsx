@@ -18,9 +18,12 @@ const ProtectedRoute = ({ children, rol }) => {
           redirectTo = '/user/psicologico';
           break;
         case 'usuario':
-        default:
           redirectTo = '/user/home';
           break;
+        case '':
+          default:
+            redirectTo = '/user';
+            break;
       }
       return <Navigate to={redirectTo} />;
     }
